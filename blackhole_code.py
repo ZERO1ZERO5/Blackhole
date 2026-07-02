@@ -9,7 +9,6 @@ import os
 import platform
 import json
 
-# --- NEW: The Memory Bank ---
 MEMORY_FILE = "blocked_ips.json"
 if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r") as f:
@@ -20,11 +19,11 @@ else:
 def banish_attacker(ip_address):
     global ALREADY_BLOCKED_IPS
     
-    # Check if we already dealt with this guy
+    
     if ip_address in ALREADY_BLOCKED_IPS:
-        return # Walk away, they are already banned!
+        return 
         
-    # If not, add them to the memory bank
+    
     ALREADY_BLOCKED_IPS.add(ip_address)
     with open(MEMORY_FILE, "w") as f:
         json.dump(list(ALREADY_BLOCKED_IPS), f)
@@ -47,11 +46,11 @@ def devour_check(packet):
     if packet.haslayer(IP):
         ip_src = packet[IP].src
         
-        # --- The Whitelist ---
+        
         if ip_src.startswith("192.168.") or ip_src.startswith("10.") or ip_src == "127.0.0.1":
             return
             
-        # 2. Check if the packet has a message
+        
         if packet.haslayer(Raw):
             try:
                 raw_data = packet[Raw].load.decode('latin-1', errors='ignore')
@@ -67,7 +66,7 @@ def devour_check(packet):
                 r"UNION\s+(/\*.*\*/\s*)?SELECT"   
             ]
             
-            # 3. The "Devour" Logic
+            # the "Devour" Logic
             for pattern in POISONOUS_PATTERNS:
                 if re.search(pattern, payload, re.IGNORECASE):
                     print(f"\n[!!!] BLACK HOLE ALERT [!!!]")
@@ -84,7 +83,7 @@ def devour_check(packet):
                     
                     return
 
-# --- SYSTEM CHECK: Verify Administrator Rights ---
+#  SYSTEM CHECK: Verify Administrator Rights 
 def is_admin():
     try:
         if platform.system() == "Windows":
@@ -100,5 +99,5 @@ if not is_admin():
     sys.exit()
 
 print("|||||||||| BLACK HOLE TASTE BUDS ACTIVE ||||||||||")
-# --- UPGRADE: TCP Stream Reassembly ---
+# UPGRADE: TCP Stream Reassembly 
 sniff(filter="tcp", prn=devour_check, store=0, session=TCPSession)
